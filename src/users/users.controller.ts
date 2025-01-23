@@ -1,7 +1,18 @@
-import { Controller, Post, Body, Get, Param, Put, Delete, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Param,
+  Put,
+  Delete,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from './users.entity';
 import { JwtAuthGuard } from '../auth/jwt.guard';
+import { RequestInterceptor } from 'src/interceptors/request.interceptor';
 
 @Controller('users')
 export class UsersController {
@@ -10,8 +21,8 @@ export class UsersController {
   @Post()
   @UseGuards(JwtAuthGuard) // Protecting the route
   async create(
-  @Body('email') email: string,
-  @Body('password') password: string,
+    @Body('email') email: string,
+    @Body('password') password: string,
   ): Promise<User> {
     return this.usersService.createUser(email, password);
   }

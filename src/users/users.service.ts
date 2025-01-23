@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { UsersRepository } from './users.repository';
 import { User } from './users.entity';
 import * as bcrypt from 'bcrypt';
@@ -9,8 +13,11 @@ export class UsersService {
 
   async createUser(email: string, password: string): Promise<User> {
     const hashedPassword = await bcrypt.hash(password, 10);
-    
-    const user = this.usersRepository.create({ email, password: hashedPassword });
+
+    const user = this.usersRepository.create({
+      email,
+      password: hashedPassword,
+    });
 
     try {
       return await this.usersRepository.save(user);
@@ -25,8 +32,6 @@ export class UsersService {
   async findByEmail(email: string): Promise<User> {
     return this.usersRepository.findOneBy({ email });
   }
-
-
 
   // Read all users
   async findAll(): Promise<User[]> {
