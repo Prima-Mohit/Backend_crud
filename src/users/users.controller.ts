@@ -10,8 +10,8 @@ export class UsersController {
   @Post()
   @UseGuards(JwtAuthGuard) // Protecting the route
   async create(
-    @Body('email') email: string,
-    @Body('password') password: string,
+  @Body('email') email: string,
+  @Body('password') password: string,
   ): Promise<User> {
     return this.usersService.createUser(email, password);
   }
