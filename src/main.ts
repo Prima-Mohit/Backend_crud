@@ -5,8 +5,8 @@ import { ErrorInterceptor } from './interceptors/error.interceptor';
 import { Logger } from '@nestjs/common';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-
+  const app = await NestFactory.create(AppModule,
+    { logger: ['log', 'error', 'warn', 'debug']})
   const globalLogger = new Logger('NestApplication');
   globalLogger.log('Application is bootstrapping...');
   app.useGlobalInterceptors(new ResponseInterceptor(), new ErrorInterceptor());
