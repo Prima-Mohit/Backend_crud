@@ -7,7 +7,9 @@ import { configDotenv } from 'dotenv';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { join } from 'path';
 import { User } from './users/users.entity';
-configDotenv()
+
+
+configDotenv();
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -19,9 +21,9 @@ configDotenv()
     AuthModule,
     TypeOrmModule.forRootAsync({
       // Use forRootAsync
-      imports: [ConfigModule.forRoot({isGlobal:true,})],
+      imports: [ConfigModule.forRoot({ isGlobal: true })],
       inject: [ConfigService],
-        useFactory: async (configService: ConfigService) => ({
+      useFactory: async (configService: ConfigService) => ({
         type: 'mysql',
         host: configService.get<string>('DATABASE_HOST'),
         port: configService.get<number>('DATABASE_PORT'),
@@ -33,6 +35,7 @@ configDotenv()
       }),
     }),
   ],
+
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
