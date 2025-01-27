@@ -7,6 +7,9 @@ import { configDotenv } from 'dotenv';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { join } from 'path';
 import { User } from './users/users.entity';
+import { LogsController } from './logger/logs.controller';
+import { LogsService } from './logger/logs.service';
+import { LogsDeletionService } from './logger/log.delete';
 
 
 configDotenv();
@@ -35,7 +38,8 @@ configDotenv();
       }),
     }),
   ],
-
+  controllers: [LogsController],
+  providers: [LoggerMiddleware, LogsService, LogsDeletionService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

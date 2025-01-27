@@ -1,29 +1,18 @@
 import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
-import {
-  appendFileSync,
-  existsSync,
-  mkdirSync,
-  statSync,
-  unlinkSync,
-  readdirSync,
-} from 'fs';
+import { toZonedTime } from 'date-fns-tz';
+import { format } from 'date-fns-tz'; // Use format from date-fns-tz
+import { LogsDeletionService } from './log.delete'; // Import LogsDeletionService
 import { join } from 'path';
+import { appendFileSync } from 'fs';
 
 @Injectable()
 export class LoggerMiddleware implements NestMiddleware {
   private readonly logger = new Logger('HTTP');
   private readonly logDir = join(__dirname, '..', '..', 'logs');
-  private readonly logFilePath = join(this.logDir, 'http.log');
-  private readonly cleanupIntervalMs = 1 * 60 * 1000; // 1 minute in milliseconds
+  private readonly timeZone = 'Asia/Kolkata'; // Set your desired timezone
 
-  constructor() {
-    // Ensure the logs directory exists
-    if (!existsSync(this.logDir)) {
-      mkdirSync(this.logDir);
-    }
-
-    // Schedule recurring cleanup
+  constructor(private readonly logsDeletionService: LogsDeletionService) {
     this.scheduleLogCleanup();
   }
 
@@ -34,7 +23,16 @@ export class LoggerMiddleware implements NestMiddleware {
     res.on('finish', () => {
       const { statusCode } = res;
       const elapsedTime = Date.now() - start;
-      const logMessage = `[${new Date().toISOString()}] [${method}] ${originalUrl} - ${statusCode} [${elapsedTime}ms]`;
+
+      // Format timestamp in Asia/Kolkata timezone
+      const zonedTime = toZonedTime(new Date(), this.timeZone);
+      const formattedTime = format(
+        zonedTime,
+        'yyyy-MM-dd hh:mm:ss a', // e.g., 2025-01-27 06:45:23 PM
+        { timeZone: this.timeZone },
+      );
+
+      const logMessage = `[${formattedTime}] [${method}] ${originalUrl} - ${statusCode} [${elapsedTime}ms]`;
 
       // Log to console
       if (statusCode >= 500) {
@@ -45,7 +43,7 @@ export class LoggerMiddleware implements NestMiddleware {
         this.logger.log(logMessage);
       }
 
-      // Save to file
+      // Save to date-based log file
       this.writeToFile(logMessage);
     });
 
@@ -53,30 +51,16 @@ export class LoggerMiddleware implements NestMiddleware {
   }
 
   private writeToFile(logMessage: string): void {
-    appendFileSync(this.logFilePath, `${logMessage}\n`);
+    const zonedTime = toZonedTime(new Date(), this.timeZone);
+    const logFileName = `${format(zonedTime, 'yyyy-MM-dd', {
+      timeZone: this.timeZone,
+    })}.log`;
+
+    const logFilePath = join(this.logDir, logFileName);
+    appendFileSync(logFilePath, `${logMessage}\n`);
   }
 
   private scheduleLogCleanup(): void {
-    setInterval(() => this.cleanupOldLogs(), this.cleanupIntervalMs);
-  }
-
-  private cleanupOldLogs(): void {
-    try {
-      const oneMinuteAgo = Date.now() - 1 * 60 * 1000; // 1 minute in milliseconds
-      const files = readdirSync(this.logDir);
-
-      files.forEach((file) => {
-        const filePath = join(this.logDir, file);
-        const fileStats = statSync(filePath);
-        const fileCreationTime = new Date(fileStats.birthtime).getTime();
-
-        if (fileCreationTime < oneMinuteAgo) {
-          unlinkSync(filePath);
-          this.logger.log(`Deleted old log file: ${filePath}`);
-        }
-      });
-    } catch (error) {
-      this.logger.error(`Error during log cleanup: ${error.message}`);
-    }
+    setInterval(() => this.logsDeletionService.deleteOldLogs(), 60 * 1000); // 1-minute interval to check for old logs
   }
 }
