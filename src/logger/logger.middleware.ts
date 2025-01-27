@@ -1,25 +1,30 @@
 import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
-import { appendFileSync, existsSync, mkdirSync } from 'fs';
+import {
+  appendFileSync,
+  existsSync,
+  mkdirSync,
+  statSync,
+  unlinkSync,
+  readdirSync,
+} from 'fs';
 import { join } from 'path';
 
 @Injectable()
 export class LoggerMiddleware implements NestMiddleware {
   private readonly logger = new Logger('HTTP');
-  private readonly logFilePath = join(
-    __dirname,
-    '..',
-    '..',
-    'logs',
-    'http.log',
-  );
+  private readonly logDir = join(__dirname, '..', '..', 'logs');
+  private readonly logFilePath = join(this.logDir, 'http.log');
+  private readonly cleanupIntervalMs = 1 * 60 * 1000; // 1 minute in milliseconds
 
   constructor() {
     // Ensure the logs directory exists
-    const logDir = join(__dirname, '..', '..', 'logs');
-    if (!existsSync(logDir)) {
-      mkdirSync(logDir);
+    if (!existsSync(this.logDir)) {
+      mkdirSync(this.logDir);
     }
+
+    // Schedule recurring cleanup
+    this.scheduleLogCleanup();
   }
 
   use(req: Request, res: Response, next: NextFunction): void {
@@ -49,5 +54,29 @@ export class LoggerMiddleware implements NestMiddleware {
 
   private writeToFile(logMessage: string): void {
     appendFileSync(this.logFilePath, `${logMessage}\n`);
+  }
+
+  private scheduleLogCleanup(): void {
+    setInterval(() => this.cleanupOldLogs(), this.cleanupIntervalMs);
+  }
+
+  private cleanupOldLogs(): void {
+    try {
+      const oneMinuteAgo = Date.now() - 1 * 60 * 1000; // 1 minute in milliseconds
+      const files = readdirSync(this.logDir);
+
+      files.forEach((file) => {
+        const filePath = join(this.logDir, file);
+        const fileStats = statSync(filePath);
+        const fileCreationTime = new Date(fileStats.birthtime).getTime();
+
+        if (fileCreationTime < oneMinuteAgo) {
+          unlinkSync(filePath);
+          this.logger.log(`Deleted old log file: ${filePath}`);
+        }
+      });
+    } catch (error) {
+      this.logger.error(`Error during log cleanup: ${error.message}`);
+    }
   }
 }
