@@ -8,9 +8,8 @@ export class LogsDeletionService {
   private readonly logDir = join(__dirname, '..', '..', 'logs');
   private readonly retentionPeriodMs = 3 * 60 * 60 * 1000; // 1 minute retention period for example
 
-
   //Deletes old log files based on retention period.
-  
+
   deleteOldLogs(): void {
     try {
       const files = readdirSync(this.logDir);

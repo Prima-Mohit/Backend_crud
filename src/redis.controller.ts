@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Body, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Post, Delete, Body } from '@nestjs/common';
 import { RedisService } from './redis.service';
 
 @Controller('redis')
@@ -6,19 +6,17 @@ export class RedisController {
   constructor(private readonly redisService: RedisService) {}
 
   @Post('set')
-  async setKey(@Body('key') key: string, @Body('value') value: string) {
-    await this.redisService.setKey(key, value);
-    return { message: `Key '${key}' set successfully.` };
+  async setKey(@Body() body: { prefix: string; key: string; value: string }) {
+    const { prefix, key, value } = body;
+    const fullKey = `${prefix}:${key}`; // Append prefix to key
+    await this.redisService.setKey(fullKey, value);
+    return { message: `Key ${fullKey} set successfully` };
   }
 
-  @Get(':key')
-  async getKey(@Param('key') key: string): Promise<string | null> {
-    return await this.redisService.getKey(key);
-  }
-
-  @Delete(':key')
-  async deleteKey(@Param('key') key: string): Promise<string> {
-    await this.redisService.deleteKey(key);
-    return `Key "${key}" deleted successfully.`;
+  @Delete('delete')
+  async deleteByPrefix(@Body() body: { prefix: string }) {
+    const { prefix } = body;
+    await this.redisService.deleteKeyWithPrefix(prefix);
+    return { message: `All keys with prefix ${prefix} deleted successfully` };
   }
 }

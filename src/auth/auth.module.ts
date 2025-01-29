@@ -7,8 +7,6 @@ import { UsersModule } from '../users/users.module';
 import { JwtStrategy } from './jwt.strategy';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
-
-
 @Module({
   imports: [
     UsersModule,
@@ -21,10 +19,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         signOptions: { expiresIn: '1h' },
       }),
     }),
-   
   ],
   providers: [AuthService, JwtStrategy],
   controllers: [AuthController],
 })
 export class AuthModule {}
- 741

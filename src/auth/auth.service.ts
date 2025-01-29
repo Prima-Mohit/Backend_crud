@@ -3,15 +3,12 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
 
-
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
-  
   ) {}
-
 
   async register(
     email: string,
@@ -36,4 +33,3 @@ export class AuthService {
     return this.jwtService.sign({ sub: userId, role });
   }
 }
-

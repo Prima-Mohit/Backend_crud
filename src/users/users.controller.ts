@@ -1,5 +1,3 @@
-
-
 import {
   Controller,
   Post,
@@ -14,12 +12,9 @@ import { UsersService } from './users.service';
 import { User } from './users.entity';
 import { JwtAuthGuard } from '../auth/jwt.guard';
 
-
-
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
-
 
   @Post()
   @UseGuards(JwtAuthGuard) // Protecting the route
