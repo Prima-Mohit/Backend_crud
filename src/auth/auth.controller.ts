@@ -8,8 +8,10 @@ import { AuthService } from './auth.service';
 import { AuthDto } from './auth.dto';
 import { JwtAuthGuard } from './jwt.guard';
 
+
 @Controller('auth')
 export class AuthController {
+
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')

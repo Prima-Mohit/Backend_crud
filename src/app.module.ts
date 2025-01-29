@@ -10,15 +10,14 @@ import { User } from './users/users.entity';
 import { LogsController } from './logger/logs.controller';
 import { LogsService } from './logger/logs.service';
 import { LogsDeletionService } from './logger/log.delete';
-
+import { CacheModule } from '@nestjs/cache-manager';
+import { redisStore } from 'cache-manager-redis-store';
+import { RedisModule } from './redis.module';
 
 configDotenv();
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: join(__dirname, '..', '.env'), // Correct path to .env
-    }),
+    RedisModule,
     UsersModule,
 
     AuthModule,

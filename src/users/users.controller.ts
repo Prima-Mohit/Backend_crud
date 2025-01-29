@@ -1,3 +1,5 @@
+
+
 import {
   Controller,
   Post,
@@ -7,16 +9,17 @@ import {
   Put,
   Delete,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from './users.entity';
 import { JwtAuthGuard } from '../auth/jwt.guard';
-import { RequestInterceptor } from 'src/interceptors/request.interceptor';
+
+
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
 
   @Post()
   @UseGuards(JwtAuthGuard) // Protecting the route
