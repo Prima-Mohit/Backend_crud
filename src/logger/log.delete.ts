@@ -6,7 +6,7 @@ import { join } from 'path';
 export class LogsDeletionService {
   private readonly logger = new Logger(LogsDeletionService.name);
   private readonly logDir = join(__dirname, '..', '..', 'logs');
-  private readonly retentionPeriodMs = 3 * 60 * 60 * 1000; // 1 minute retention period for example
+  private readonly retentionPeriodMs = 3*24 * 60 * 60 * 1000; // 1 minute retention period for example
 
   //Deletes old log files based on retention period.
 
