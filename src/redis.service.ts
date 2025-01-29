@@ -1,24 +1,26 @@
-import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { Tedis } from 'tedis';
-import { ConfigService } from '@nestjs/config';
 
 @Injectable()
-export class RedisService implements OnModuleInit {
-  private readonly redisDb: number;
-
+export class RedisService {
   constructor(
-    @Inject('REDIS_CLIENT') private readonly redisClient: Tedis,
-    private readonly configService: ConfigService,
-  ) {
-    this.redisDb = this.configService.get<number>('REDIS_DB', 0); // Default DB: 0
-  }
-
-  async onModuleInit() {
-    await this.redisClient.command('SELECT', this.redisDb);
-  }
-
-  async setKey(key: string, value: string): Promise<void> {
+    @Inject('REDIS_CLIENT') private readonly redisClient: Tedis, // Inject REDIS_CLIENT token
+  ) {}
+  // async onModuleInit() {
+  //   // Schedule cache clearing every hour
+  //   setInterval(
+  //     async () => {
+  //       console.log('Clearing cache...');
+  //       await this.clearAll();
+  //       console.log('done');
+  //     },
+  //      10 * 1000,
+  //   ); // 1 hour = 60 min * 60 sec * 1000 ms
+  // }
+  async setKey(key: string, value: string, ttl: number = 60*60): Promise<void> {//times 60sec 60 min 
+    console.log('value set');
     await this.redisClient.set(key, value);
+    await this.redisClient.command('EXPIRE', key, ttl); // Ensure expiration is set
   }
 
   async getKey(key: string): Promise<string | null> {

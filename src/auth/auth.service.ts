@@ -36,3 +36,4 @@ export class AuthService {
     return this.jwtService.sign({ sub: userId, role });
   }
 }
+

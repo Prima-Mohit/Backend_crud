@@ -6,7 +6,7 @@ import { Tedis } from 'tedis';
 
 @Module({
   imports: [ConfigModule.forRoot()],
-  controllers: [RedisController], // Register the RedisController here
+  controllers: [RedisController],
   providers: [
     {
       provide: 'REDIS_CLIENT',
@@ -16,13 +16,13 @@ import { Tedis } from 'tedis';
           host: configService.get<string>('REDIS_HOST'),
           port: configService.get<number>('REDIS_PORT'),
         });
-        const redisDb = configService.get<number>('REDIS_DB', 0); // Default DB 0
+        const redisDb = configService.get<number>('REDIS_DB', 0);
         await client.command('SELECT', redisDb);
         return client;
       },
     },
     RedisService,
   ],
-  exports: ['REDIS_CLIENT', RedisService],
+  exports: ['REDIS_CLIENT', RedisService], // Export RedisService
 })
 export class RedisModule {}
