@@ -1,31 +1,23 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { Tedis } from 'tedis';
+import { Cluster } from 'ioredis';
 
 @Injectable()
 export class RedisService {
   constructor(
-    @Inject('REDIS_CLIENT') private readonly redisClient: Tedis, // Inject REDIS_CLIENT token
+    @Inject('REDIS_CLIENT') private readonly redisClient: Cluster, // Inject Cluster client
   ) {}
-  // async onModuleInit() {
-  //   // Schedule cache clearing every hour
-  //   setInterval(
-  //     async () => {
-  //       console.log('Clearing cache...');
-  //       await this.clearAll();
-  //       console.log('done');
-  //     },
-  //      10 * 1000,
-  //   ); // 1 hour = 60 min * 60 sec * 1000 ms
-  // }
-  async setKey(key: string, value: string, ttl: number = 60*60): Promise<void> {//times 60sec 60 min 
-    console.log('value set');
-    await this.redisClient.set(key, value);
-    await this.redisClient.command('EXPIRE', key, ttl); // Ensure expiration is set
+
+  async setKey(
+    key: string,
+    value: string,
+    ttl: number = 60 * 60,
+  ): Promise<void> {
+    console.log('Setting value in Redis Cluster');
+    await this.redisClient.set(key, value, 'EX', ttl);
   }
 
   async getKey(key: string): Promise<string | null> {
-    const result = await this.redisClient.get(key);
-    return result !== null ? String(result) : null;
+    return await this.redisClient.get(key);
   }
 
   async deleteKey(key: string): Promise<void> {
@@ -33,6 +25,8 @@ export class RedisService {
   }
 
   async clearAll(): Promise<void> {
-    await this.redisClient.command('FLUSHDB');
+    await this.redisClient.flushall();
   }
 }
+
+

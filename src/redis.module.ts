@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { RedisService } from './redis.service';
 import { RedisController } from './redis.controller';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { Tedis } from 'tedis';
+import { Cluster } from 'ioredis';
 
 @Module({
   imports: [ConfigModule.forRoot()],
@@ -12,17 +12,37 @@ import { Tedis } from 'tedis';
       provide: 'REDIS_CLIENT',
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => {
-        const client = new Tedis({
-          host: configService.get<string>('REDIS_HOST'),
-          port: configService.get<number>('REDIS_PORT'),
+        const cluster = new Cluster(
+          [
+            {
+              host: configService.get<string>('REDIS_HOST_1', '127.0.0.1'),
+              port: 7001,
+            },
+            {
+              host: configService.get<string>('REDIS_HOST_2', '127.0.0.1'),
+              port: 7002,
+            },
+            {
+              host: configService.get<string>('REDIS_HOST_3', '127.0.0.1'),
+              port: 7003,
+            },
+          ],
+          {
+            redisOptions: {
+              password: configService.get<string>('REDIS_PASSWORD', ''),
+            },
+          },
+        );
+
+        cluster.on('error', (err) => {
+          console.error('Redis Cluster error:', err);
         });
-        const redisDb = configService.get<number>('REDIS_DB', 0);
-        await client.command('SELECT', redisDb);
-        return client;
+
+        return cluster;
       },
     },
     RedisService,
   ],
-  exports: ['REDIS_CLIENT', RedisService], // Export RedisService
+  exports: ['REDIS_CLIENT', RedisService],
 })
 export class RedisModule {}
