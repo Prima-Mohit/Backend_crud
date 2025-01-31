@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { UsersRepository } from './users.repository';
 import { User } from './users.entity';
-import { RedisService } from '../redis.service';
+import { RedisService } from '../Redis/redis.service';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()

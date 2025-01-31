@@ -5,7 +5,7 @@ import { UsersRepository } from './users.repository';
 import { User } from './users.entity';
 import { UsersController } from './users.controller';
 import { CacheModule } from '@nestjs/cache-manager';
-import { RedisModule } from '../redis.module';
+import { RedisModule } from '../Redis/redis.module';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User]), RedisModule],

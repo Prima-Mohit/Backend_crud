@@ -15,16 +15,16 @@ import { Cluster } from 'ioredis';
         const cluster = new Cluster(
           [
             {
-              host: configService.get<string>('REDIS_HOST_1', '127.0.0.1'),
-              port: 7001,
+              host: configService.get<string>('REDIS_HOST_1',process.env.REDIS_HOST_1),
+              port: parseInt(process.env.REDIS_PORT_1),
             },
             {
-              host: configService.get<string>('REDIS_HOST_2', '127.0.0.1'),
-              port: 7002,
+              host: configService.get<string>('REDIS_HOST_2',process.env.REDIS_HOST_2),
+              port: parseInt(process.env.REDIS_PORT_2),
             },
             {
-              host: configService.get<string>('REDIS_HOST_3', '127.0.0.1'),
-              port: 7003,
+              host: configService.get<string>('REDIS_HOST_3', process.env.REDIS_HOST_3),
+              port: parseInt(process.env.REDIS_PORT_3),
             },
           ],
           {

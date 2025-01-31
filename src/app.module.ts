@@ -12,7 +12,7 @@ import { LogsService } from './logger/logs.service';
 import { LogsDeletionService } from './logger/log.delete';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-store';
-import { RedisModule } from './redis.module';
+import { RedisModule } from './Redis/redis.module';
 
 configDotenv();
 @Module({
